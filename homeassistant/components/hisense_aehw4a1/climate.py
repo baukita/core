@@ -30,7 +30,7 @@ from homeassistant.const import ATTR_TEMPERATURE, PRECISION_WHOLE, UnitOfTempera
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from . import CONF_IP_ADDRESS, DOMAIN
+from .const import DOMAIN
 
 MIN_TEMP_C = 16
 MAX_TEMP_C = 32
@@ -113,26 +113,14 @@ AC_TO_HA_SWING = {
 _LOGGER = logging.getLogger(__name__)
 
 
-def _build_entity(device):
-    _LOGGER.debug("Found device at %s", device)
-    return ClimateAehW4a1(device)
-
-
 async def async_setup_entry(
     hass: HomeAssistant,
-    config_entry: ConfigEntry,
+    entry: ConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up the AEH-W4A1 climate platform."""
-    # Priority 1: manual config
-    if hass.data[DOMAIN].get(CONF_IP_ADDRESS):
-        devices = hass.data[DOMAIN][CONF_IP_ADDRESS]
-    else:
-        # Priority 2: scanned interfaces
-        devices = await AehW4a1().discovery()
-
-    entities = [_build_entity(device) for device in devices]
-    async_add_entities(entities, True)
+    """Set up the Hisense AEH-W4A1 climate entity."""
+    host = hass.data[DOMAIN][entry.entry_id]
+    async_add_entities([ClimateAehW4a1(host)], True)
 
 
 class ClimateAehW4a1(ClimateEntity):
